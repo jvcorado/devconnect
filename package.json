@@ -1,0 +1,37 @@
+{
+  "name": "devconnect",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@clerk/clerk-react": "^5.11.0",
+    "@clerk/nextjs": "^5.7.2",
+    "@clerk/themes": "^2.1.35",
+    "@nextui-org/avatar": "^2.0.33",
+    "@nextui-org/button": "^2.0.38",
+    "@nextui-org/card": "^2.0.34",
+    "@nextui-org/input": "^2.2.5",
+    "@nextui-org/system": "^2.2.6",
+    "@nextui-org/theme": "^2.2.11",
+    "framer-motion": "^11.11.8",
+    "lucide-react": "^0.452.0",
+    "next": "^14.2.3",
+    "react": "^18",
+    "react-dom": "^18"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "eslint": "^8",
+    "eslint-config-next": "14.2.15",
+    "postcss": "^8",
+    "tailwindcss": "^3.4.1",
+    "typescript": "^5"
+  }
+}
