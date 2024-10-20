@@ -16,9 +16,13 @@ const config: Config = {
       colors: {
         background: "var(--background)",
         foreground: "var(--foreground)",
-        default: "#181818"
+        default: "#0A0A0A",
+        secondary: "#181818",
+
 
       },
+
+
     },
   },
   plugins: [nextui()],
