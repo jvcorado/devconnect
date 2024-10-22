@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Header from "./components/header";
 import NewPost from "./components/new_post";
 import Post from "./components/post";
 import { useUser } from "@clerk/clerk-react";
 import { useMediaQuery } from "usehooks-ts";
+import get from "./api/get";
 
 export interface Posts {
   id: string;
@@ -14,11 +15,30 @@ export interface Posts {
   title: string;
 }
 
+/* export interface Post {
+  id: number;
+  user_id: number;
+  content: string;
+  image_url: string;
+  likes: number;
+  shares: number;
+  created_at: string; // Pode ser Date se você quiser parsear a data
+} */
+
 export default function Home() {
   const { isSignedIn } = useUser();
   const [newPost, setNewPost] = useState(false);
   const isDesktop = useMediaQuery("(min-width: 768px)");
   const [feed, setFeed] = useState<Posts[]>([]);
+
+  const getPosts = async () => {
+    const response = await get("list-all");
+    console.log(response);
+  };
+
+  useEffect(() => {
+    getPosts();
+  }, []);
 
   return (
     <div className="flex flex-col gap-2 lg:gap-3 relative ">

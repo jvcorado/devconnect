@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
-/* import { ClerkProvider } from "@clerk/nextjs";
-import { dark } from "@clerk/themes"; */
+import { ClerkProvider } from "@clerk/nextjs";
+import { dark } from "@clerk/themes";
 /* import Login from "./components/login"; */
 
 export const metadata: Metadata = {
@@ -22,16 +22,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    /*    <ClerkProvider
+    <ClerkProvider
       appearance={{
         baseTheme: dark,
       }}
-    > */
-    <html lang="pt-br">
-      <body className="bg-default min-h-screen h-full !overflow-y-hidden">
-        {children}
-      </body>
-    </html>
-    /*     </ClerkProvider> */
+    >
+      <html lang="pt-br">
+        <body className="bg-default min-h-screen h-full !overflow-y-hidden">
+          {children}
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }
