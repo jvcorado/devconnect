@@ -3,38 +3,45 @@
 import { Button } from "@nextui-org/button";
 import { CirclePlus } from "lucide-react";
 import { UserButton, useUser } from "@clerk/clerk-react";
-import { v4 as uuidv4 } from "uuid";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { Textarea } from "@nextui-org/input";
-import { Posts } from "../page";
+import create from "../api/create";
 
+/* interface Posts {
+  user_id: number;
+  content: string;
+  image_url: string;
+  likes: number;
+  shares: number;
+}
+ */
 export default function NewPost({
   newPost,
   setNewPost,
-  setFeed,
 }: {
   newPost: boolean;
-  setFeed: (update: Posts[] | ((prevFeed: Posts[]) => Posts[])) => void;
   setNewPost: (value: boolean) => void;
 }) {
   const { user, isSignedIn } = useUser();
   const inputRef = useRef<HTMLTextAreaElement>(null);
-  const [post, setPost] = useState<Posts>({
-    id: "",
-    image: "",
-    user: "",
-    title: "",
-  });
 
-  const createPost = () => {
-    const newPostWithId: Posts = { ...post, id: uuidv4() };
-    setFeed((prevFeed: Posts[]) => [newPostWithId, ...prevFeed]);
-    setPost({
-      id: "",
-      image: "",
-      user: user?.fullName ?? "",
-      title: "",
-    });
+  const createPost = async () => {
+    let body = {};
+    body = {
+      user_id: 1,
+      content: "Compartilhando nosso primeiro post! na aplicação",
+      image_url:
+        "https://cdn.pixabay.com/photo/2015/04/23/22/00/tree-736885__480.jpg",
+      likes: 0,
+      shares: 0,
+    };
+
+    const response = await create({ path: "post/create", body });
+
+    if (response.status === 200 || response.status === 201) {
+      console.log("Post created successfully");
+    } else console.log("Failed to create post");
+
     setNewPost(false);
   };
 
@@ -59,17 +66,9 @@ export default function NewPost({
       onKeyDown={handleKeyDown}
       label=""
       placeholder="Enter your post"
-      defaultValue={post.title}
+      defaultValue={""}
       className="w-[100%] mx-auto text-white"
       autoFocus
-      onChange={(e) =>
-        setPost((prevPost) => ({
-          ...prevPost,
-          image: user?.imageUrl ?? "",
-          user: user?.fullName ?? "",
-          title: e.target.value,
-        }))
-      }
     />
   );
 

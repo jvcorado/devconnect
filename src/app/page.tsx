@@ -9,21 +9,14 @@ import { useMediaQuery } from "usehooks-ts";
 import get from "./api/get";
 
 export interface Posts {
-  id: string;
-  image: string;
-  user: string;
-  title: string;
-}
-
-/* export interface Post {
   id: number;
   user_id: number;
   content: string;
   image_url: string;
   likes: number;
   shares: number;
-  created_at: string; // Pode ser Date se você quiser parsear a data
-} */
+  created_at: string;
+}
 
 export default function Home() {
   const { isSignedIn } = useUser();
@@ -32,8 +25,8 @@ export default function Home() {
   const [feed, setFeed] = useState<Posts[]>([]);
 
   const getPosts = async () => {
-    const response = await get("list-all");
-    console.log(response);
+    const response = await get("post/list-all");
+    setFeed(response.data ?? []);
   };
 
   useEffect(() => {
@@ -45,7 +38,7 @@ export default function Home() {
       <Header />
 
       <div className="pt-3  lg:pt-0 w-[90%] lg:max-w-[30%] flex flex-col gap-3 mx-auto">
-        <NewPost setFeed={setFeed} setNewPost={setNewPost} newPost={newPost} />
+        <NewPost setNewPost={setNewPost} newPost={newPost} />
       </div>
 
       <div
@@ -59,7 +52,7 @@ export default function Home() {
       >
         <div className="flex flex-col lg:gap-3">
           {feed.map((post) => (
-            <Post key={post.id} item={post} setFeed={setFeed} />
+            <Post key={post.id} item={post} /* setFeed={setFeed} */ />
           ))}
         </div>
 
