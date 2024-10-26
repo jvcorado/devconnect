@@ -4,7 +4,6 @@ import { useEffect, useLayoutEffect, useState } from "react";
 import Header from "./components/header";
 import NewPost from "./components/new_post";
 import Post from "./components/post";
-import { useUser } from "@clerk/clerk-react";
 import { useMediaQuery } from "usehooks-ts";
 import get from "./api/get";
 
@@ -19,7 +18,7 @@ export interface Posts {
 }
 
 export default function Home() {
-  const { isSignedIn } = useUser();
+  /*   const { isSignedIn } = useUser(); */
   const [newPost, setNewPost] = useState(false);
   const isDesktop = useMediaQuery("(min-width: 768px)");
   const [feed, setFeed] = useState<Posts[]>([]);
@@ -40,6 +39,8 @@ export default function Home() {
       setCreate(false);
     }
   }, [create]);
+
+  const isSignedIn = true;
 
   return (
     <div className="flex flex-col gap-2 md:gap-3 relative ">
