@@ -10,46 +10,60 @@ import { useMediaQuery } from "usehooks-ts";
 import {
   SwipeableList,
   SwipeableListItem,
-  /*   SwipeAction,
-  TrailingActions, */
+  SwipeAction,
+  TrailingActions,
 } from "react-swipeable-list";
 import "react-swipeable-list/dist/styles.css";
 import { Posts } from "../page";
+import deletion from "../api/delete";
 
 export default function Post({ item }: { item: Posts }) {
   const [isFollowed, setIsFollowed] = useState(false);
-  const [isLike, setIsLike] = useState(false);
+  const [isLike, setIsLike] = useState(item.likes > 0 ? true : false);
   const [isComment, setIsComment] = useState(false);
   const isDesktop = useMediaQuery("(min-width: 768px)");
 
-  /* const deletePost = (id: number) => {
-    setFeed((prevFeed: Posts[]) =>
-      prevFeed.filter((post: Posts) => post.id !== id)
-    );
-  }; */
+  const deletePost = async (id: number) => {
+    try {
+      const response = await deletion({ path: `post/delete/${id}` });
 
-  /*  const trailingActions = () => {
+      if (response.status === 200 || response.status === 201) {
+        console.log("Post deleted successfully");
+      } else {
+        console.log("Post not deleted");
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const trailingActions = (id: number) => {
     return (
       <div className="bg-[#CC3733] flex items-center justify-between p-3 rounded-lg">
         <TrailingActions>
-          <SwipeAction destructive={true} onClick={() => {}}>
+          <SwipeAction destructive={true} onClick={() => deletePost(id)}>
             Delete
           </SwipeAction>
         </TrailingActions>
       </div>
     );
   };
- */
+
   return (
     <SwipeableList key={item.id} className="flex flex-col">
-      <SwipeableListItem className="mt-1" key={item.id}>
-        <Card className="w-[100%] mx-auto !min-h-full !h-full bg-[#0A0A0A] lg:!bg-[#181818] !border-none !shadow-none px-3 ">
+      <SwipeableListItem
+        className="mt-1"
+        key={item.id}
+        trailingActions={trailingActions(item.id)}
+      >
+        <Card className="w-[100%] mx-auto !min-h-full !h-full bg-[#0A0A0A] md:!bg-[#181818] !border-none !shadow-none px-3 ">
           <CardHeader className="justify-between">
             <div className="flex gap-5">
               <Avatar isBordered radius="full" size="md" src={item.image_url} />
               <div className="flex flex-col gap-1 items-start justify-center">
                 <h4 className="text-small font-semibold leading-none text-white">
-                  {item.user_id}
+                  {/* {item.user_id} */}
+                  USER
                 </h4>
               </div>
             </div>
@@ -68,8 +82,9 @@ export default function Post({ item }: { item: Posts }) {
             </Button>
           </CardHeader>
           <CardBody className="ps-[70px] py-0 text-small text-[#ffffff8e] overflow-y-hidden">
-            <p>{item.content}</p>
+            <p style={{ whiteSpace: "pre-line" }}>{item.content}</p>
           </CardBody>
+
           <CardFooter className="gap-3 ps-[70px]">
             <Button
               onClick={() => setIsLike(!isLike)}

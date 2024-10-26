@@ -14,7 +14,7 @@ export default function Header() {
   if (!isSignedIn || isDesktop) {
     return (
       <header
-        className={` flex h-[60px] lg:sticky lg:top-0 lg:z-50 items-center justify-between px-5  text-xl  text-white`}
+        className={` flex h-[60px] md:sticky md:top-0 md:z-50 items-center justify-between px-5  text-xl  text-white`}
       >
         <div className="loader"></div>
 

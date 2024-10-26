@@ -32,7 +32,9 @@ export type PostsInputSchema = z.infer<typeof postsSchema>;
 export default function NewPost({
   newPost,
   setNewPost,
+  setCreate,
 }: {
+  setCreate: (value: boolean) => void;
   newPost: boolean;
   setNewPost: (value: boolean) => void;
 }) {
@@ -42,9 +44,9 @@ export default function NewPost({
   const {
     handleSubmit,
     control,
-    formState: { errors, isSubmitting },
+    reset,
+    formState: { errors },
     watch,
-    setValue,
   } = useForm<PostsInputSchema>({ resolver: zodResolver(postsSchema) });
 
   const onSubmit = async () => {
@@ -56,15 +58,15 @@ export default function NewPost({
       content: post,
       image_url:
         "https://cdn.pixabay.com/photo/2015/04/23/22/00/tree-736885__480.jpg",
-      likes: 0,
+      likes: 1,
       shares: 0,
     };
-
-    console.log(body);
 
     const response = await create({ path: "post/create", body });
 
     if (response.status === 200 || response.status === 201) {
+      setCreate(true);
+      reset({});
       console.log("Post created successfully");
     } else console.log("Failed to create post");
 
@@ -77,12 +79,15 @@ export default function NewPost({
     }
   };
 
-  console.log(watch("content"));
-
   const handleKeyDown = (event: React.KeyboardEvent) => {
     if (event.key === "Enter" && !event.shiftKey) {
-      event.preventDefault();
       return onSubmit();
+    }
+  };
+
+  const handleKeyDownEsc = (event: React.KeyboardEvent) => {
+    if (event.key === "Escape" && !event.shiftKey) {
+      setNewPost(false);
     }
   };
 
@@ -93,10 +98,14 @@ export default function NewPost({
       render={({ field }) => (
         <Textarea
           {...field}
+          errorMessage={errors.content?.message}
           variant="bordered"
           color="secondary"
-          ref={inputRef} // Corrigido de 'ref' para 'inputRef'
-          onKeyDown={handleKeyDown}
+          ref={inputRef}
+          onKeyDown={(event) => {
+            handleKeyDown(event);
+            handleKeyDownEsc(event);
+          }}
           label=""
           placeholder="Enter your post"
           defaultValue=""
@@ -117,6 +126,7 @@ export default function NewPost({
     return (
       <>
         <div
+          onKeyDown={handleKeyDownEsc}
           className={`w-full py-2 rounded-2xl flex items-start bg-[#181818]  ${
             newPost ? "ps-5 " : "ps-5"
           }`}
@@ -129,7 +139,7 @@ export default function NewPost({
             className="flex gap-5 items-center"
           >
             <UserButton />
-            <div className="flex flex-col gap-1 items-start justify-center">
+            <div className="flex flex-col gap-1 items-start justify-center ps-4">
               <h4 className="text-small font-semibold leading-none text-[#ffffff]">
                 {user?.fullName}
               </h4>
