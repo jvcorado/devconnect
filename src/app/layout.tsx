@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import { AuthProvider } from "./context/authContext";
 
 export const metadata: Metadata = {
   title: "DevConnect",
@@ -21,7 +22,7 @@ export default function RootLayout({
   return (
     <html lang="pt-br">
       <body className="bg-default min-h-screen h-full !overflow-y-hidden">
-        {children}
+        <AuthProvider>{children}</AuthProvider>
       </body>
     </html>
   );

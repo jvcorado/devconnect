@@ -9,6 +9,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import { Avatar } from "@nextui-org/avatar";
+import { useAuth } from "../context/authContext";
 
 /* interface Posts {
   user_id: number;
@@ -40,6 +41,8 @@ export default function NewPost({
 }) {
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
+  const { user } = useAuth();
+
   const {
     handleSubmit,
     control,
@@ -53,7 +56,7 @@ export default function NewPost({
 
     let body = {};
     body = {
-      user_id: 1,
+      user_id: user?.id,
       content: post,
       image_url:
         "https://cdn.pixabay.com/photo/2015/04/23/22/00/tree-736885__480.jpg",
@@ -136,10 +139,10 @@ export default function NewPost({
           }}
           className="flex gap-5 items-center"
         >
-          <Avatar src="https://cdn.pixabay.com/photo/2015/04/23/22/00/tree-736885__480.jpg" />
+          <Avatar src={user?.avatar_url} />
           <div className="flex flex-col gap-1 items-start justify-center ps-4">
             <h4 className="text-small font-semibold leading-none text-[#ffffff]">
-              Nome usuário
+              {user?.username}
             </h4>
             <h5 className="text-small tracking-tight text-[#ffffff8e]">
               Write your post

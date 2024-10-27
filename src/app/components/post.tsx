@@ -4,7 +4,7 @@ import { Avatar } from "@nextui-org/avatar";
 import { Button } from "@nextui-org/button";
 import { Card, CardHeader, CardBody, CardFooter } from "@nextui-org/card";
 import { HeartIcon, MessageCircle, Send } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useLayoutEffect, useState } from "react";
 import { Textarea } from "@nextui-org/input";
 import { useMediaQuery } from "usehooks-ts";
 import {
@@ -16,12 +16,45 @@ import {
 import "react-swipeable-list/dist/styles.css";
 import { Posts } from "../page";
 import deletion from "../api/delete";
+import get from "../api/get";
+
+export interface User {
+  id: number;
+  name: string;
+  username: string;
+  email: string;
+  password: string;
+  bio: string;
+  avatar_url: string;
+}
 
 export default function Post({ item }: { item: Posts }) {
   const [isFollowed, setIsFollowed] = useState(false);
   const [isLike, setIsLike] = useState(item.likes > 0 ? true : false);
   const [isComment, setIsComment] = useState(false);
+  const [userData, setUserData] = useState<User[]>([]);
+  const [userFiltered, setUserFiltered] = useState<User[]>([]);
   const isDesktop = useMediaQuery("(min-width: 768px)");
+
+  const getUserData = async () => {
+    const response = await get("user/list-all");
+    setUserData(response.data ?? []);
+  };
+
+  const filterUserData = (id: number) => {
+    const data = userData.filter((user: User) => user.id === id);
+    return setUserFiltered(data);
+  };
+
+  useLayoutEffect(() => {
+    getUserData();
+  }, []);
+
+  useEffect(() => {
+    if (userData.length > 0) {
+      filterUserData(item.user_id);
+    }
+  }, [userData, item.user_id]);
 
   const deletePost = async (id: number) => {
     try {
@@ -59,11 +92,15 @@ export default function Post({ item }: { item: Posts }) {
         <Card className="w-[100%] mx-auto !min-h-full !h-full bg-[#0A0A0A] md:!bg-[#181818] !border-none !shadow-none px-3 ">
           <CardHeader className="justify-between">
             <div className="flex gap-5">
-              <Avatar isBordered radius="full" size="md" src={item.image_url} />
+              <Avatar
+                isBordered
+                radius="full"
+                size="md"
+                src={userFiltered[0]?.avatar_url}
+              />
               <div className="flex flex-col gap-1 items-start justify-center">
                 <h4 className="text-small font-semibold leading-none text-white">
-                  {/* {item.user_id} */}
-                  USER
+                  {userFiltered[0]?.username}
                 </h4>
               </div>
             </div>
