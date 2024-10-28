@@ -10,6 +10,7 @@ import { useForm } from "react-hook-form";
 import { User } from "./post";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../context/authContext";
+import Link from "next/link";
 
 const userSchema = z.object({
   username: z.string(),
@@ -63,9 +64,11 @@ export default function Login() {
 
   return (
     <div className="h-screen flex items-center justify-center">
-      <div className="bg-secondary h-[80%] w-[30%] rounded-3xl flex flex-col gap-5 items-center pt-20 p-10 text-white shadow-2xl">
+      <div className="bg-secondary md:h-[80%] w-[90%] md:w-[30%] rounded-3xl flex flex-col gap-5 items-center pt-20 p-10 text-white shadow-2xl">
         <h1 className="text-4xl">DevConnect</h1>
-        <p className="text-lg">Onde a Tecnologia Encontra a Conexão!</p>
+        <p className="text-lg text-center">
+          Onde a Tecnologia Encontra a Conexão!
+        </p>
 
         <FormInput
           name="email"
@@ -93,6 +96,10 @@ export default function Login() {
         >
           Login
         </Button>
+
+        <Link href={"/register"} className="text-sm text-center">
+          Não Possui uma conta? Criar agora gratuitamente{" "}
+        </Link>
       </div>
     </div>
   );

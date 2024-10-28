@@ -10,6 +10,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import { Avatar } from "@nextui-org/avatar";
 import { useAuth } from "../context/authContext";
+import { Posts } from "../page";
 
 /* interface Posts {
   user_id: number;
@@ -33,9 +34,9 @@ export type PostsInputSchema = z.infer<typeof postsSchema>;
 export default function NewPost({
   newPost,
   setNewPost,
-  setCreate,
+  setFeed,
 }: {
-  setCreate: (value: boolean) => void;
+  setFeed: (update: Posts[] | ((prevFeed: Posts[]) => Posts[])) => void;
   newPost: boolean;
   setNewPost: (value: boolean) => void;
 }) {
@@ -54,9 +55,8 @@ export default function NewPost({
   const onSubmit = async () => {
     const post = watch("content");
 
-    let body = {};
-    body = {
-      user_id: user?.id,
+    const body = {
+      user_id: user?.id ?? 0, // fallback se user.id for indefinido
       content: post,
       image_url:
         "https://cdn.pixabay.com/photo/2015/04/23/22/00/tree-736885__480.jpg",
@@ -67,10 +67,13 @@ export default function NewPost({
     const response = await create({ path: "post/create", body });
 
     if (response.status === 200 || response.status === 201) {
-      setCreate(true);
       reset({});
+      setFeed((prevFeed: Posts[]) => [...prevFeed, response.data]);
+
       console.log("Post created successfully");
-    } else console.log("Failed to create post");
+    } else {
+      console.log("Failed to create post");
+    }
 
     setNewPost(false);
   };

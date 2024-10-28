@@ -64,10 +64,12 @@ export default function Register() {
           e.preventDefault();
           handleSubmit(() => onSubmit())();
         }}
-        className="bg-secondary h-[80%] w-[30%] rounded-3xl flex  flex-col  gap-5 items-center pt-20 p-10 text-white shadow-2xl"
+        className="bg-secondary md:h-[80%] w-[90%] md:w-[30%]  rounded-3xl flex  flex-col  gap-5 items-center pt-20 p-10 text-white shadow-2xl"
       >
         <h1 className="text-4xl">DevConnect</h1>
-        <p className="text-lg">Onde a Tecnologia Encontra a Conexão!</p>
+        <p className="text-lg text-center">
+          Onde a Tecnologia Encontra a Conexão!
+        </p>
 
         <FormInput
           name="email"
