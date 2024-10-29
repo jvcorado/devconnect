@@ -18,6 +18,7 @@ interface UserData {
   password: string;
   bio: string;
   avatar_url: string;
+  token?: string;
 }
 
 // Defina o tipo das propriedades do contexto

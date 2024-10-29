@@ -11,6 +11,7 @@ import { Controller, useForm } from "react-hook-form";
 import { Avatar } from "@nextui-org/avatar";
 import { useAuth } from "../context/authContext";
 import { Posts } from "../page";
+import { useRouter } from "next/navigation";
 
 /* interface Posts {
   user_id: number;
@@ -43,6 +44,7 @@ export default function NewPost({
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
   const { user } = useAuth();
+  const router = useRouter();
 
   const {
     handleSubmit,
@@ -56,13 +58,17 @@ export default function NewPost({
     const post = watch("content");
 
     const body = {
-      user_id: user?.id ?? 0, // fallback se user.id for indefinido
+      user_id: Number(user?.id) ?? 0,
       content: post,
-      image_url:
-        "https://cdn.pixabay.com/photo/2015/04/23/22/00/tree-736885__480.jpg",
+      image_url: user?.avatar_url ?? "",
       likes: 1,
       shares: 0,
     };
+
+    if (user?.id === undefined) {
+      alert("Faça login para postar");
+      router.push("/login");
+    }
 
     const response = await create({ path: "post/create", body });
 

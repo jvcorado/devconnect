@@ -8,6 +8,7 @@ import { useMediaQuery } from "usehooks-ts";
 import get from "./api/get";
 
 import ReactPullToRefresh from "react-pull-to-refresh";
+import { useAuth } from "./context/authContext";
 
 export interface Posts {
   id: number;
@@ -24,6 +25,9 @@ export default function Home() {
   const [newPost, setNewPost] = useState(false);
   const isDesktop = useMediaQuery("(min-width: 768px)");
   const [feed, setFeed] = useState<Posts[]>([]);
+  const { user } = useAuth();
+
+  const isSignedIn = user?.token;
 
   const getPosts = async () => {
     const response = await get("post/list-all");
@@ -37,8 +41,6 @@ export default function Home() {
   const handleRefresh = async () => {
     await getPosts();
   };
-
-  const isSignedIn = true;
 
   return (
     <div className="flex flex-col gap-2 md:gap-3 relative ">
@@ -58,7 +60,7 @@ export default function Home() {
               : "md:max-h-[calc(100vh_-_80px)] md:min-h-[calc(100vh_-_80px)]"
           } flex flex-col gap-3 w-full text-white mx-auto md:overflow-y-auto scroll-transparent  md:max-w-[60%] lg:max-w-[30%] h-full`}
         >
-          <div className="flex flex-col md:gap-3">
+          <div className="flex flex-col md:gap-3 ">
             {feed
               .slice()
               .reverse()

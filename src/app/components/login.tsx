@@ -1,8 +1,5 @@
 "use client";
 
-import React, { useEffect, useLayoutEffect, useState } from "react";
-import { Button } from "@nextui-org/button";
-import get from "../api/get";
 import FormInput from "./inputUI/inputUI";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -11,60 +8,55 @@ import { User } from "./post";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../context/authContext";
 import Link from "next/link";
+import login from "../api/login";
+import { Button } from "@nextui-org/button";
 
 const userSchema = z.object({
-  username: z.string(),
-  email: z.string().email(),
+  email: z.string(),
+  password: z.string(),
 });
 
 export type UserInputSchema = z.infer<typeof userSchema>;
 
 export default function Login() {
-  const [userData, setUserData] = useState<User[]>([]);
-  const [userFiltered, setUserFiltered] = useState<User[]>([]);
   const router = useRouter();
   const { setUser } = useAuth();
 
   const {
     control,
+    handleSubmit,
     formState: { errors },
     watch,
   } = useForm<UserInputSchema>({
     resolver: zodResolver(userSchema),
   });
 
-  const getUserData = async () => {
-    const response = await get("user/list-all");
-    setUserData(response.data ?? []);
-  };
+  async function onSubmit() {
+    const response = await login({
+      body: {
+        email: watch("email"),
+        password: watch("password"),
+      },
+    });
 
-  const filterUserData = (email: string) => {
-    const data = userData.filter((user: User) => user.email === email);
-    return setUserFiltered(data);
-  };
-
-  useLayoutEffect(() => {
-    getUserData();
-  }, []);
-
-  useEffect(() => {
-    if (userData.length > 0) {
-      filterUserData(watch("email"));
-    }
-  }, [userData, watch("email")]);
-
-  const handleLogin = async () => {
-    try {
-      setUser(userFiltered[0]);
+    if (response.status === 200 || response.status === 201) {
+      setUser(response.data as User);
       router.push("/");
-    } catch (error) {
-      console.error("Erro no login:", error);
+    } else {
+      console.error("Erro no login:", response.data);
     }
-  };
+  }
 
   return (
-    <div className="h-screen flex items-center justify-center">
-      <div className="bg-secondary md:h-[80%] w-[90%] md:w-[30%] rounded-3xl flex flex-col gap-5 items-center pt-20 p-10 text-white shadow-2xl">
+    <div className="min-h-screen container flex items-center justify-center">
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          handleSubmit(onSubmit)();
+        }}
+        className="bg-secondary   md:h-[80%] w-[90%] md:w-[60%] xl:w-[30%] rounded-3xl flex flex-col gap-5 items-center pt-20 p-10 text-white shadow-2xl"
+      >
+        <div className="loader"></div>
         <h1 className="text-4xl">DevConnect</h1>
         <p className="text-lg text-center">
           Onde a Tecnologia Encontra a Conexão!
@@ -73,34 +65,29 @@ export default function Login() {
         <FormInput
           name="email"
           label="Email"
-          type="email"
+          type="text"
           placeholder="Enter your email"
           control={control as never}
           error={errors as never}
         />
 
         <FormInput
-          name="username"
-          label="Username"
+          name="password"
+          label="Password"
           type="text"
-          placeholder="Enter your username"
+          placeholder="Enter your password"
           control={control as never}
           error={errors as never}
         />
 
-        <Button
-          color="default"
-          size="lg"
-          className="text-white w-full"
-          onClick={handleLogin}
-        >
-          Login
+        <Button type="submit" color="primary" className="w-full" size="lg">
+          Salvar
         </Button>
 
         <Link href={"/register"} className="text-sm text-center">
           Não Possui uma conta? Criar agora gratuitamente{" "}
         </Link>
-      </div>
+      </form>
     </div>
   );
 }
