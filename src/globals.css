@@ -64,7 +64,7 @@ html {
 
 /* From Uiverse.io by adamgiebl */
 .container {
-  width: 100%;
+  width: 100vw;
   height: 100%;
   --color: rgba(114, 114, 114, 0.3);
   background-color: #191a1a;

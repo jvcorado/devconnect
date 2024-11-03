@@ -6,7 +6,7 @@ const nextConfig = {
         serverActions: true,
     },
     images: {
-        domains: ['files.stripe.com'],
+        domains: ['files.stripe.com', 'res.cloudinary.com'],
     },
 
 };

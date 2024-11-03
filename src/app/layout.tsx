@@ -1,6 +1,10 @@
 import type { Metadata, Viewport } from "next";
-import "./globals.css";
-import { AuthProvider } from "./context/authContext";
+import "../globals.css";
+import { AuthProvider } from "../context/authContext";
+import Menu from "@/components/menu";
+import Header from "@/components/header";
+import { PostProvider } from "@/context/postContext";
+import Login from "./login/page";
 
 export const metadata: Metadata = {
   title: "DevConnect",
@@ -22,7 +26,18 @@ export default function RootLayout({
   return (
     <html lang="pt-br">
       <body className="bg-default min-h-screen h-full !overflow-y-hidden">
-        <AuthProvider>{children}</AuthProvider>
+        <AuthProvider>
+          <PostProvider>
+            {typeof window !== "undefined" && (
+              <>
+                <Header />
+                {children}
+                <Login />
+                <Menu />
+              </>
+            )}
+          </PostProvider>
+        </AuthProvider>
       </body>
     </html>
   );

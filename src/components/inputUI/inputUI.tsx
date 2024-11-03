@@ -1,6 +1,9 @@
+"use client";
+
 import React, { HTMLInputTypeAttribute } from "react";
 import { Control, Controller, FieldErrors } from "react-hook-form";
 import { Input } from "@nextui-org/input";
+import { Eye, EyeOff } from "lucide-react";
 
 interface FormInputProps {
   error?: FieldErrors<{ message: string }> | FieldErrors;
@@ -25,6 +28,10 @@ const FormInput: React.FC<FormInputProps> = ({
   control,
   placeholder,
 }) => {
+  const [isVisible, setIsVisible] = React.useState(false);
+
+  const toggleVisibility = () => setIsVisible(!isVisible);
+
   return (
     <Controller
       name={name}
@@ -36,10 +43,26 @@ const FormInput: React.FC<FormInputProps> = ({
             size="lg"
             variant="flat"
             color="default"
-            type={type}
+            type={isVisible ? "text" : type}
             label={label}
             placeholder={placeholder}
             className="w-full"
+            endContent={
+              type === "password" && (
+                <button
+                  className="focus:outline-none"
+                  type="button"
+                  onClick={toggleVisibility}
+                  aria-label="toggle password visibility"
+                >
+                  {isVisible ? (
+                    <Eye className="text-2xl text-default-400 pointer-events-none" />
+                  ) : (
+                    <EyeOff className="text-2xl text-default-400 pointer-events-none" />
+                  )}
+                </button>
+              )
+            }
           />
           {error && <p className="text-red-500 text-sm">{error.message}</p>}
         </div>

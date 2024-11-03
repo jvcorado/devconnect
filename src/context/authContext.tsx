@@ -1,5 +1,6 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 // AuthContext.tsx
 import React, {
   createContext,
@@ -24,6 +25,8 @@ interface UserData {
 // Defina o tipo das propriedades do contexto
 interface AuthContextProps {
   user: UserData | null;
+  openLogin: boolean;
+  setOpenLogin: (value: boolean) => void;
   setUser: (userData: UserData) => void;
   logout: () => void;
 }
@@ -38,6 +41,9 @@ interface AuthProviderProps {
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<UserData | null>(null);
+  const [openLogin, setOpenLogin] = useState(false);
+  const path = usePathname();
+  const pathLogin = path === "/login";
 
   // Carregue os dados do usuário do localStorage ao montar o componente
   useEffect(() => {
@@ -59,8 +65,28 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setUser(null);
   };
 
+  useEffect(() => {
+    if (path === "/login" || path === "/register") {
+      logout();
+    }
+  }, [path]);
+
+  useEffect(() => {
+    if (pathLogin) {
+      setOpenLogin(true);
+    }
+  }, [pathLogin]);
+
+  useEffect(() => {
+    if (user) {
+      setOpenLogin(false);
+    }
+  }, [user]);
+
   return (
-    <AuthContext.Provider value={{ user, setUser: handleSetUser, logout }}>
+    <AuthContext.Provider
+      value={{ user, setUser: handleSetUser, logout, openLogin, setOpenLogin }}
+    >
       {children}
     </AuthContext.Provider>
   );

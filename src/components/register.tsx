@@ -4,10 +4,12 @@ import { Button } from "@nextui-org/button";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import create from "../api/create";
+
 import FormInput from "./inputUI/inputUI";
-import { useAuth } from "../context/authContext";
-import { useRouter } from "next/navigation";
+import { useAuth } from "@/context/authContext";
+import { usePathname, useRouter } from "next/navigation";
+import create from "@/api/create";
+import Modals from "./modalUI/modal";
 
 const userSchema = z.object({
   name: z.string(),
@@ -20,14 +22,15 @@ const userSchema = z.object({
 
 export type UserInputSchema = z.infer<typeof userSchema>;
 
-export default function Register() {
+export default function RegisterForm() {
   const { setUser } = useAuth();
+  const path = usePathname();
   const router = useRouter();
 
   const {
     handleSubmit,
     control,
-    formState: { errors },
+    formState: { errors, isSubmitting },
     watch,
     reset,
   } = useForm<UserInputSchema>({
@@ -58,13 +61,17 @@ export default function Register() {
   };
 
   return (
-    <div className="  h-screen flex items-center justify-center">
+    <Modals
+      isOpen={path === "/register"}
+      onOpenChange={() => {}}
+      onClose={() => router.push("/")}
+    >
       <form
         onSubmit={(e) => {
           e.preventDefault();
           handleSubmit(() => onSubmit())();
         }}
-        className="bg-secondary md:h-[80%] w-[90%] md:w-[30%]  rounded-3xl flex  flex-col  gap-5 items-center pt-20 p-10 text-white shadow-2xl"
+        className="flex flex-col gap-5 items-center pt-20 p-10 text-white "
       >
         <h1 className="text-4xl">DevConnect</h1>
         <p className="text-lg text-center">
@@ -112,9 +119,9 @@ export default function Register() {
           size="lg"
           className="text-white w-full"
         >
-          Login
+          {isSubmitting ? <p className="loader">.</p> : "Register"}
         </Button>
       </form>
-    </div>
+    </Modals>
   );
 }

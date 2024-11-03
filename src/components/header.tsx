@@ -1,14 +1,26 @@
+"use client";
+
 import { Avatar } from "@nextui-org/avatar";
 import { useMediaQuery } from "usehooks-ts";
-import { useAuth } from "../context/authContext";
 import { Popover, PopoverTrigger, PopoverContent } from "@nextui-org/popover";
 import { Button } from "@nextui-org/button";
-import { useRouter } from "next/navigation";
+import { useAuth } from "@/context/authContext";
+import { usePathname } from "next/navigation";
 
 export default function Header() {
   const isDesktop = useMediaQuery("(min-width: 1024px)");
-  const { user, logout } = useAuth();
-  const router = useRouter();
+
+  const { user, logout, setOpenLogin } = useAuth();
+
+  const path = usePathname();
+
+  if (
+    path === "/login" ||
+    path === "/register" ||
+    path === "/forgot-password"
+  ) {
+    return null;
+  }
 
   return (
     <header
@@ -19,7 +31,7 @@ export default function Header() {
       <div className="loader"></div>
 
       {user === null ? (
-        <Button color="success" onPress={() => router.push("/login")}>
+        <Button color="primary" onPress={() => setOpenLogin(true)}>
           Sign In
         </Button>
       ) : (

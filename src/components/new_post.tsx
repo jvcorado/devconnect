@@ -4,23 +4,17 @@ import { Button } from "@nextui-org/button";
 import { CirclePlus } from "lucide-react";
 import { useEffect, useRef } from "react";
 import { Textarea } from "@nextui-org/input";
-import create from "../api/create";
+
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import { Avatar } from "@nextui-org/avatar";
-import { useAuth } from "../context/authContext";
-import { Posts } from "../page";
-import { useRouter } from "next/navigation";
 
-/* interface Posts {
-  user_id: number;
-  content: string;
-  image_url: string;
-  likes: number;
-  shares: number;
-}
- */
+import { Posts } from "@/app/page";
+import { useAuth } from "@/context/authContext";
+import create from "@/api/create";
+import ModalSm from "./modal_sm";
+import { usePost } from "@/context/postContext";
 
 const postsSchema = z.object({
   user_id: z.number().int().nonnegative(),
@@ -33,18 +27,14 @@ const postsSchema = z.object({
 export type PostsInputSchema = z.infer<typeof postsSchema>;
 
 export default function NewPost({
-  newPost,
-  setNewPost,
   setFeed,
 }: {
   setFeed: (update: Posts[] | ((prevFeed: Posts[]) => Posts[])) => void;
-  newPost: boolean;
-  setNewPost: (value: boolean) => void;
 }) {
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
-  const { user } = useAuth();
-  const router = useRouter();
+  const { user, setOpenLogin } = useAuth();
+  const { setNewPosts, openModal, setOpenModal } = usePost();
 
   const {
     handleSubmit,
@@ -65,23 +55,18 @@ export default function NewPost({
       shares: 0,
     };
 
-    if (user?.id === undefined) {
-      alert("Faça login para postar");
-      router.push("/login");
-    }
-
     const response = await create({ path: "post/create", body });
 
     if (response.status === 200 || response.status === 201) {
       reset({});
+      setNewPosts(true);
       setFeed((prevFeed: Posts[]) => [...prevFeed, response.data]);
-
       console.log("Post created successfully");
     } else {
       console.log("Failed to create post");
     }
 
-    setNewPost(false);
+    setOpenModal(false);
   };
 
   const focusInput = () => {
@@ -98,7 +83,7 @@ export default function NewPost({
 
   const handleKeyDownEsc = (event: React.KeyboardEvent) => {
     if (event.key === "Escape" && !event.shiftKey) {
-      setNewPost(false);
+      setOpenModal(false);
     }
   };
 
@@ -128,19 +113,14 @@ export default function NewPost({
   );
 
   useEffect(() => {
-    if (newPost && inputRef.current) {
+    if (openModal && inputRef.current) {
       inputRef.current.focus();
     }
-  }, [newPost]);
+  }, [openModal]);
 
   return (
     <>
-      <div
-        onKeyDown={handleKeyDownEsc}
-        className={`w-full py-2 rounded-2xl flex items-start bg-[#181818]  ${
-          newPost ? "ps-5 " : "ps-5"
-        }`}
-      >
+      <ModalSm handleKeyDownEsc={handleKeyDownEsc}>
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -161,7 +141,11 @@ export default function NewPost({
 
         <Button
           onPress={() => {
-            setNewPost(!newPost);
+            if (user?.id === undefined || null) {
+              return setOpenLogin(true);
+            }
+
+            setOpenModal(!openModal);
           }}
           onClick={focusInput}
           color="secondary"
@@ -169,8 +153,10 @@ export default function NewPost({
         >
           <CirclePlus color="#336AEA" size={44} />
         </Button>
+      </ModalSm>
+      <div className="pt-3  md:pt-0 w-[calc(100%_-_36px)] md:max-w-[60%] lg:max-w-[30%] flex flex-col gap-3 mx-auto">
+        {openModal && writePost()}
       </div>
-      {newPost && writePost()}
     </>
   );
 }

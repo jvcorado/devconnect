@@ -1,9 +1,10 @@
 "use client";
 
+import FormInput from "./inputUI/inputUI";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-
+import { User } from "./post";
 import { useRouter } from "next/navigation";
 
 import Link from "next/link";
@@ -11,9 +12,7 @@ import Link from "next/link";
 import { Button } from "@nextui-org/button";
 import { useAuth } from "@/context/authContext";
 import login from "@/api/login";
-import { User } from "@/components/post";
-import Modals from "@/components/modalUI/modal";
-import FormInput from "@/components/inputUI/inputUI";
+import Modals from "./modalUI/modal";
 
 const userSchema = z.object({
   email: z.string(),
@@ -22,7 +21,7 @@ const userSchema = z.object({
 
 export type UserInputSchema = z.infer<typeof userSchema>;
 
-export default function Login() {
+export default function LoginForm() {
   const router = useRouter();
   const { setUser, openLogin, setOpenLogin } = useAuth();
 
