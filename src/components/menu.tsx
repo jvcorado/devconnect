@@ -22,7 +22,7 @@ export default function Menu() {
   const getColor = (route: string) => (path === route ? "#FFFFFF" : "#acacac");
 
   return (
-    <footer className=" flex items-center md:fixed md:left-3 md:top-0 md:w-[60px]  md:h-[40%] md:bg-[#181818] md:my-auto md:flex-col rounded-2xl bg-[#181818] justify-between fixed bottom-3 w-[80%] left-14 mx-auto px-5 py-3">
+    <footer className=" z-50 flex items-center md:fixed md:left-3 md:top-0 md:w-[60px]  md:h-[40%] md:bg-[#181818] md:my-auto md:flex-col rounded-2xl bg-[#181818] justify-between fixed bottom-3 w-[80%] left-14 mx-auto px-5 py-3">
       <Link href={"/"}>
         <House color={getColor("/")} size={32} />
       </Link>

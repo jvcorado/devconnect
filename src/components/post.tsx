@@ -19,6 +19,7 @@ import { Posts } from "@/app/page";
 import deletion from "@/api/delete";
 import { useAuth } from "@/context/authContext";
 import Image from "next/image";
+import { usePost } from "@/context/postContext";
 
 export interface User {
   id: number;
@@ -41,6 +42,7 @@ export default function Post({ item }: { item: Posts }) {
   const isDesktop = useMediaQuery("(min-width: 1024px)");
 
   const { user } = useAuth();
+  const { setNewPosts } = usePost();
 
   const id_user = Number(user?.id);
 
@@ -77,6 +79,7 @@ export default function Post({ item }: { item: Posts }) {
 
         if (response.status === 200 || response.status === 201) {
           console.log("Post deleted successfully");
+          setNewPosts(true);
         } else {
           console.log("Post not deleted");
         }

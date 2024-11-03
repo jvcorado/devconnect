@@ -28,14 +28,10 @@ export default function RootLayout({
       <body className="bg-default min-h-screen h-full !overflow-y-hidden">
         <AuthProvider>
           <PostProvider>
-            {typeof window !== "undefined" && (
-              <>
-                <Header />
-                {children}
-                <Login />
-                <Menu />
-              </>
-            )}
+            <Header />
+            {children}
+            <Login />
+            <Menu />
           </PostProvider>
         </AuthProvider>
       </body>
