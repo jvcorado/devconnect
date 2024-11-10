@@ -25,7 +25,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-br">
-      <body className="bg-default !min-h-screen !h-full !max-h-full !overflow-y-hidden">
+      <body className="bg-default !min-h-screen !h-full !max-h-full md:!overflow-y-hidden">
         <AuthProvider>
           <PostProvider>
             <Header />
