@@ -1,20 +1,22 @@
 "use client";
 
 import { Button } from "@nextui-org/button";
-import { CirclePlus } from "lucide-react";
-import { useEffect, useRef } from "react";
+import { CirclePlus, ImagePlus } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { Textarea } from "@nextui-org/input";
 
-import { z } from "zod";
+import { set, z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import { Avatar } from "@nextui-org/avatar";
+import { CldUploadWidget } from "next-cloudinary";
 
 import { Posts } from "@/app/page";
 import { useAuth } from "@/context/authContext";
 import create from "@/api/create";
 import ModalSm from "./modal_sm";
 import { usePost } from "@/context/postContext";
+import Image from "next/image";
 
 const postsSchema = z.object({
   user_id: z.number().int().nonnegative(),
@@ -35,6 +37,7 @@ export default function NewPost({
 
   const { user, setOpenLogin } = useAuth();
   const { setNewPosts, openModal, setOpenModal } = usePost();
+  const [urlImage, setUrl] = useState(null);
 
   const {
     handleSubmit,
@@ -50,7 +53,7 @@ export default function NewPost({
     const body = {
       user_id: Number(user?.id) ?? 0,
       content: post,
-      image_url: user?.avatar_url ?? "",
+      image_url: urlImage.url ?? "",
       likes: 1,
       shares: 0,
     };
@@ -60,6 +63,7 @@ export default function NewPost({
     if (response.status === 200 || response.status === 201) {
       reset({});
       setNewPosts(true);
+      setUrl(null);
       setFeed((prevFeed: Posts[]) => [...prevFeed, response.data]);
       console.log("Post created successfully");
     } else {
@@ -88,28 +92,32 @@ export default function NewPost({
   };
 
   const writePost = () => (
-    <Controller
-      control={control}
-      name="content"
-      render={({ field }) => (
-        <Textarea
-          {...field}
-          errorMessage={errors.content?.message}
-          variant="bordered"
-          color="secondary"
-          ref={inputRef}
-          onKeyDown={(event) => {
-            handleKeyDown(event);
-            handleKeyDownEsc(event);
-          }}
-          label=""
-          placeholder="Enter your post"
-          defaultValue=""
-          className="w-[100%] mx-auto text-white"
-          autoFocus
-        />
-      )}
-    />
+    <div className=" flex flex-col gap-3">
+      {urlImage && <Image src={urlImage.url} width={200} height={200} alt="" />}
+
+      <Controller
+        control={control}
+        name="content"
+        render={({ field }) => (
+          <Textarea
+            {...field}
+            errorMessage={errors.content?.message}
+            variant="bordered"
+            color="secondary"
+            ref={inputRef}
+            onKeyDown={(event) => {
+              handleKeyDown(event);
+              handleKeyDownEsc(event);
+            }}
+            label=""
+            placeholder="Enter your post"
+            defaultValue=""
+            className="w-[100%] mx-auto text-white"
+            autoFocus
+          />
+        )}
+      />
+    </div>
   );
 
   useEffect(() => {
@@ -136,6 +144,19 @@ export default function NewPost({
             <h5 className="text-small tracking-tight text-[#ffffff8e]">
               Write your post
             </h5>
+
+            <CldUploadWidget
+              uploadPreset="devconnect"
+              onSuccess={({ info }) => {
+                setUrl(info);
+              }}
+            >
+              {({ open }) => {
+                return (
+                  <ImagePlus onClick={() => open()} size={16} color="white" />
+                );
+              }}
+            </CldUploadWidget>
           </div>
         </form>
 
