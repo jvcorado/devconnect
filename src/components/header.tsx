@@ -24,7 +24,7 @@ export default function Header() {
 
   return (
     <header
-      className={`flex h-[60px] sticky top-0 z-50 items-center justify-between px-5 text-xl text-white ${
+      className={`flex h-[60px] md:sticky md:top-0 z-50 items-center justify-between px-5 text-xl text-white ${
         isDesktop ? "bg-[#0A0A0A]" : "bg-transparent"
       }`}
     >
