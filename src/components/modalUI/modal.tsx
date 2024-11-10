@@ -22,8 +22,8 @@ export default function Modals({
       onOpenChange={onOpenChange}
       onClose={onClose}
       placement={isDesktop ? "center" : "bottom"}
-      className="bg-secondary !h-[60vh] md:h-full"
-      size={isDesktop ? "lg" : "full"}
+      className="bg-secondary "
+      size={"lg"}
     >
       <ModalContent>
         <>

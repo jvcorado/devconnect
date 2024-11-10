@@ -71,21 +71,24 @@ export default function Register() {
           e.preventDefault();
           handleSubmit(() => onSubmit())();
         }}
-        className="flex flex-col gap-5 items-center pt-20 p-10 text-white "
+        className="flex flex-col gap-5 items-center p-10 !overflow-y-auto text-white "
       >
         <h1 className="text-4xl">DevConnect</h1>
         <p className="text-lg text-center">
           Onde a Tecnologia Encontra a Conexão!
         </p>
 
-        <FormInput
-          name="email"
-          label="Email"
-          type="email"
-          placeholder="Enter your email"
-          control={control as never}
-          error={errors as never}
-        />
+        <div tabIndex={1} className="w-full">
+          <FormInput
+            name="email"
+            label="Email"
+            type="text"
+            placeholder="Enter your email"
+            control={control as never}
+            error={errors as never}
+          />
+        </div>
+
         <FormInput
           name="name"
           label="Name"

@@ -140,7 +140,12 @@ export default function Profile() {
             }}
           >
             {({ open }) => (
-              <Button color="primary" size="lg" className="w-full">
+              <Button
+                onClick={() => open()}
+                color="primary"
+                size="lg"
+                className="w-full"
+              >
                 <ImagePlus onClick={() => open()} size={24} color="white" />
                 Adicionar imagem de perfil
               </Button>

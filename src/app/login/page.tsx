@@ -63,7 +63,7 @@ export default function Login() {
             e.preventDefault();
             handleSubmit(onSubmit)();
           }}
-          className="flex flex-col gap-5 items-center pt-20 p-10 text-white "
+          className="flex flex-col gap-5 items-center pt-20 p-10 text-white max-md:overflow-y-auto max-md:max-h-[80vh] max-md:scroll-transparent"
         >
           <div className="loader"></div>
           <h1 className="text-4xl">DevConnect</h1>
@@ -71,14 +71,16 @@ export default function Login() {
             Onde a Tecnologia Encontra a Conexão!
           </p>
 
-          <FormInput
-            name="email"
-            label="Email"
-            type="text"
-            placeholder="Enter your email"
-            control={control as never}
-            error={errors as never}
-          />
+          <div tabIndex={1} className="w-full">
+            <FormInput
+              name="email"
+              label="Email"
+              type="text"
+              placeholder="Enter your email"
+              control={control as never}
+              error={errors as never}
+            />
+          </div>
 
           <FormInput
             name="password"
@@ -93,7 +95,11 @@ export default function Login() {
             {isSubmitting ? <p className="loader">.</p> : "Login"}
           </Button>
 
-          <Link href={"/register"} className="text-sm text-center">
+          <Link
+            onClick={() => setOpenLogin(false)}
+            href={"/register"}
+            className="text-sm text-center"
+          >
             Não Possui uma conta? Criar agora gratuitamente{" "}
           </Link>
 
