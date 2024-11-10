@@ -36,7 +36,7 @@ export default function Home() {
     <div className="flex flex-col gap-2 md:gap-3 relative ">
       <NewPost setFeed={setFeed} />
       <Container handleRefresh={handleRefresh}>
-        <div className="flex flex-col md:gap-3">
+        <div className="flex flex-col md:gap-3  pb-[260px] md:pb-0">
           {feed
             .slice()
             .reverse()

@@ -62,8 +62,8 @@ export const PostProvider: React.FC<PostProviderProps> = ({ children }) => {
       0
     );
 
-    const followers = 100;
-    const following = 150;
+    const followers = 0;
+    const following = 0;
 
     setPost(filteredPost);
     setAboutProfile({ publications, likes, followers, following });
