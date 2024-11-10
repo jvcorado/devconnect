@@ -5,11 +5,14 @@ import { CirclePlus, ImagePlus } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Textarea } from "@nextui-org/input";
 
-import { set, z } from "zod";
+import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import { Avatar } from "@nextui-org/avatar";
-import { CldUploadWidget } from "next-cloudinary";
+import {
+  CldUploadWidget,
+  CloudinaryUploadWidgetResults,
+} from "next-cloudinary";
 
 import { Posts } from "@/app/page";
 import { useAuth } from "@/context/authContext";
@@ -17,6 +20,10 @@ import create from "@/api/create";
 import ModalSm from "./modal_sm";
 import { usePost } from "@/context/postContext";
 import Image from "next/image";
+
+interface CloudinaryInfo {
+  url: string;
+}
 
 const postsSchema = z.object({
   user_id: z.number().int().nonnegative(),
@@ -37,7 +44,7 @@ export default function NewPost({
 
   const { user, setOpenLogin } = useAuth();
   const { setNewPosts, openModal, setOpenModal } = usePost();
-  const [urlImage, setUrl] = useState(null);
+  const [urlImage, setUrl] = useState<CloudinaryInfo | null>(null);
 
   const {
     handleSubmit,
@@ -53,7 +60,7 @@ export default function NewPost({
     const body = {
       user_id: Number(user?.id) ?? 0,
       content: post,
-      image_url: urlImage.url ?? "",
+      image_url: urlImage?.url ?? "",
       likes: 1,
       shares: 0,
     };
@@ -147,15 +154,20 @@ export default function NewPost({
 
             <CldUploadWidget
               uploadPreset="devconnect"
-              onSuccess={({ info }) => {
-                setUrl(info);
+              onSuccess={(results: CloudinaryUploadWidgetResults) => {
+                if (results.info) {
+                  const info: CloudinaryInfo =
+                    typeof results.info === "string"
+                      ? { url: results.info } // If `info` is a string, wrap it in an object
+                      : results.info; // Otherwise, use the object directly
+                  setUrl(info || null); // Set the CloudinaryInfo object
+                  setOpenModal(!openModal);
+                }
               }}
             >
-              {({ open }) => {
-                return (
-                  <ImagePlus onClick={() => open()} size={16} color="white" />
-                );
-              }}
+              {({ open }) => (
+                <ImagePlus onClick={() => open()} size={16} color="white" />
+              )}
             </CldUploadWidget>
           </div>
         </form>
