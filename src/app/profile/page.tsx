@@ -18,10 +18,21 @@ import {
   CldUploadWidget,
   CloudinaryUploadWidgetResults,
 } from "next-cloudinary";
-import { ImagePlus } from "lucide-react";
+import { Plus } from "lucide-react";
 import update from "@/api/update";
+import { Posts } from "../page";
+import Stories from "stories-react";
+import "stories-react/dist/index.css";
+import { useMediaQuery } from "usehooks-ts";
+import create from "@/api/create";
 interface CloudinaryInfo {
   url: string;
+}
+
+interface Story {
+  type: "image";
+  url: string;
+  duration: number;
 }
 
 const userSchema = z.object({
@@ -37,14 +48,26 @@ export default function Profile() {
   const [openModal, setOpenModal] = useState(false);
   const { setUser, user } = useAuth();
   const [urlImage, setUrl] = useState<CloudinaryInfo | null>(null);
+  const [openStorys, setOpenStorys] = useState(false);
+  const [storysFeed, setStorysFeeds] = useState<Story[]>([]);
+  const isDesktop = useMediaQuery("(min-width: 1024px)");
 
-  const getPosts = async () => {
+  const getStorys = async () => {
     const response = await get("post/list-all");
-    return response.data ?? [];
-  };
+    const postsWithImages = response.data.filter(
+      (item: Posts) => item.content === "feed" && item.image_url !== ""
+    );
 
+    const storyData: Story[] = postsWithImages.map((post: Posts) => ({
+      type: "image",
+      url: post.image_url,
+      duration: 5000, // Define a duration padrão ou personalize conforme necessário
+    }));
+
+    return setStorysFeeds(storyData);
+  };
   const handleRefresh: () => Promise<void> = async () => {
-    await getPosts();
+    await getStorys();
   };
 
   const {
@@ -56,6 +79,29 @@ export default function Profile() {
   } = useForm<UserInputSchema>({
     resolver: zodResolver(userSchema),
   });
+
+  const uploadImg = async () => {
+    let body = {};
+
+    body = {
+      user_id: Number(user?.id) ?? 0,
+      content: "feed",
+      image_url: urlImage?.url ?? "",
+      likes: 0,
+      shares: 0,
+    };
+
+    console.log(body);
+
+    const response = await create({ path: "post/create", body });
+
+    if (response.status === 200 || response.status === 201) {
+      reset({});
+      getStorys();
+    } else {
+      console.log("Story not created");
+    }
+  };
 
   const onSubmit = async () => {
     let body = {};
@@ -81,6 +127,18 @@ export default function Profile() {
   };
 
   useEffect(() => {
+    if (urlImage) {
+      uploadImg();
+    }
+  }, [urlImage]);
+
+  useEffect(() => {
+    if (openStorys) {
+      getStorys();
+    }
+  }, [openStorys]);
+
+  useEffect(() => {
     reset({
       name: user?.name,
       username: user?.username,
@@ -98,7 +156,26 @@ export default function Profile() {
           }}
           className="flex flex-col gap-5 items-center pt-20 p-10 text-white "
         >
-          <h1 className="text-4xl text-start">Editar Perfil</h1>
+          <CldUploadWidget
+            uploadPreset="devconnect"
+            onSuccess={(results: CloudinaryUploadWidgetResults) => {
+              if (results.info) {
+                const info: CloudinaryInfo =
+                  typeof results.info === "string"
+                    ? { url: results.info } // If `info` is a string, wrap it in an object
+                    : results.info; // Otherwise, use the object directly
+                setUrl(info || null); // Set the CloudinaryInfo object
+              }
+            }}
+          >
+            {({ open }) => (
+              <Avatar
+                onClick={() => open()}
+                size="lg"
+                src={urlImage?.url ?? user?.avatar_url}
+              />
+            )}
+          </CldUploadWidget>
 
           <FormInput
             name="name"
@@ -127,38 +204,42 @@ export default function Profile() {
             error={errors as never}
           />
 
-          <CldUploadWidget
-            uploadPreset="devconnect"
-            onSuccess={(results: CloudinaryUploadWidgetResults) => {
-              if (results.info) {
-                const info: CloudinaryInfo =
-                  typeof results.info === "string"
-                    ? { url: results.info } // If `info` is a string, wrap it in an object
-                    : results.info; // Otherwise, use the object directly
-                setUrl(info || null); // Set the CloudinaryInfo object
-              }
-            }}
-          >
-            {({ open }) => (
-              <Button color="primary" size="lg" className="w-full">
-                <ImagePlus onClick={() => open()} size={24} color="white" />
-                Adicionar imagem de perfil
-              </Button>
-            )}
-          </CldUploadWidget>
-
           <Button
             type="submit"
             color="default"
             size="lg"
             className="text-white w-full"
           >
-            {isSubmitting ? <p className="loader">.</p> : "Editar"}
+            {isSubmitting ? <p className="loader">.</p> : "Edit"}
           </Button>
         </form>
       </Modals>
     );
   };
+
+  const storys = () => {
+    return (
+      <Modals
+        size={isDesktop ? "2xl" : "full"}
+        isOpen={openStorys}
+        onOpenChange={() => setOpenStorys(false)}
+      >
+        {isDesktop ? (
+          <div className="!overflow-x-hidden mx-auto flex items-center justify-center">
+            <Stories width="400px" height="600px" stories={storysFeed} />
+          </div>
+        ) : (
+          <div className="!overflow-x-hidden ">
+            <Stories width="100vw" height="100vh" stories={storysFeed} />
+          </div>
+        )}
+      </Modals>
+    );
+  };
+
+  if (openStorys) {
+    return storys();
+  }
 
   return (
     <div className="flex flex-col gap-2 md:gap-3 relative ">
@@ -166,7 +247,35 @@ export default function Profile() {
         <div className="flex flex-col gap-2 w-full">
           <div className=" flex gap-1 justify-between ">
             <div className="flex gap-1 items-center">
-              <Avatar size="lg" src={user?.avatar_url} />
+              <CldUploadWidget
+                uploadPreset="devconnect"
+                onSuccess={(results: CloudinaryUploadWidgetResults) => {
+                  if (results.info) {
+                    const info: CloudinaryInfo =
+                      typeof results.info === "string"
+                        ? { url: results.info } // Se `info` for uma string, envolve em um objeto
+                        : results.info; // Caso contrário, use o objeto diretamente
+                    setUrl(info || null); // Define o objeto CloudinaryInfo
+                  }
+                }}
+              >
+                {({ open }) => (
+                  <div className="relative">
+                    <Avatar
+                      onClick={() => setOpenStorys(true)}
+                      size="lg"
+                      src={user?.avatar_url}
+                    />
+                    <Plus
+                      size={24}
+                      onClick={() => open()}
+                      color="white"
+                      className="absolute bottom-0 right-0 bg-primary rounded-full p-1 cursor-pointer"
+                    />
+                  </div>
+                )}
+              </CldUploadWidget>
+
               <div className="flex flex-col gap-1 items-start justify-center ps-4">
                 <h4 className="text-small font-semibold leading-none text-[#ffffff]">
                   {user?.name}
@@ -181,15 +290,15 @@ export default function Profile() {
           <div className="  flex items-center justify-center gap-5 w-full text-white">
             <div className="flex flex-col gap-1 items-center">
               <p className="font-semibold">{aboutProfile.publications}</p>
-              <p>publicação </p>
+              <p>posts </p>
             </div>
             <div className="flex flex-col gap-1 items-center">
               <p className="font-semibold">{aboutProfile.followers}</p>
-              <p>seguidores </p>
+              <p>followers </p>
             </div>
             <div className="flex flex-col gap-1 items-center">
               <p className="font-semibold">{aboutProfile.following}</p>
-              <p>seguindo </p>
+              <p>following </p>
             </div>
           </div>
 
@@ -198,7 +307,7 @@ export default function Profile() {
             color="primary"
             className=" text-white p-3 rounded-xl font-semibold  me-5 mb-2"
           >
-            Editar
+            Edit
           </Button>
         </div>
       </ModalSm>

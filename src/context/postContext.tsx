@@ -55,9 +55,12 @@ export const PostProvider: React.FC<PostProviderProps> = ({ children }) => {
     const response = await get("post/list-all");
     const data = response.data ?? [];
     const filteredPost = data.filter((post: Posts) => post.user_id === id_user);
+    const filter = filteredPost.filter(
+      (post: Posts) => post.content !== "feed"
+    );
 
-    const publications = filteredPost.length;
-    const likes = filteredPost.reduce(
+    const publications = filter.length;
+    const likes = filter.reduce(
       (acc: number, post: Posts) => acc + post.likes,
       0
     );
@@ -65,7 +68,7 @@ export const PostProvider: React.FC<PostProviderProps> = ({ children }) => {
     const followers = 0;
     const following = 0;
 
-    setPost(filteredPost);
+    setPost(filter);
     setAboutProfile({ publications, likes, followers, following });
   };
 
