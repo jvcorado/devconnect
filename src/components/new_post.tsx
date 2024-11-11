@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@nextui-org/button";
-import { CirclePlus, ImagePlus } from "lucide-react";
+import { CirclePlus, ImagePlus, Send } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Textarea } from "@nextui-org/input";
 
@@ -20,6 +20,7 @@ import create from "@/api/create";
 import ModalSm from "./modal_sm";
 import { usePost } from "@/context/postContext";
 import Image from "next/image";
+import { useMediaQuery } from "usehooks-ts";
 
 interface CloudinaryInfo {
   url: string;
@@ -45,6 +46,7 @@ export default function NewPost({
   const { user, setOpenLogin } = useAuth();
   const { setNewPosts, openModal, setOpenModal } = usePost();
   const [urlImage, setUrl] = useState<CloudinaryInfo | null>(null);
+  const isDesktop = useMediaQuery("min-width: 1024px");
 
   const {
     handleSubmit,
@@ -93,7 +95,7 @@ export default function NewPost({
   };
 
   const handleKeyDownEsc = (event: React.KeyboardEvent) => {
-    if (event.key === "Escape" && !event.shiftKey) {
+    if (event.key === "Escape" && !event.shiftKey && isDesktop) {
       setOpenModal(false);
     }
   };
@@ -119,11 +121,22 @@ export default function NewPost({
             label=""
             placeholder="Enter your post"
             defaultValue=""
-            className="w-[100%] mx-auto text-white"
+            className="w-[100%] mx-auto text-white "
             autoFocus
           />
         )}
       />
+      <Button
+        className={
+          "bg-[#313131] text-[#ffffff] border-default-200 w-[70px] self-end "
+        }
+        radius="full"
+        size="sm"
+        variant={"solid"}
+        onPress={() => onSubmit()}
+      >
+        Add <Send size={24} color="white" />
+      </Button>
     </div>
   );
 

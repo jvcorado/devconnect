@@ -7,6 +7,8 @@ import { HeartIcon, MessageCircle, Send } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Textarea } from "@nextui-org/input";
 import { useMediaQuery } from "usehooks-ts";
+import { formatDistanceToNow } from "date-fns";
+import { ptBR } from "date-fns/locale";
 import {
   SwipeableList,
   SwipeableListItem,
@@ -40,6 +42,11 @@ export default function Post({ item }: { item: Posts }) {
   const [userFiltered, setUserFiltered] = useState<User[]>([]);
 
   const isDesktop = useMediaQuery("(min-width: 1024px)");
+
+  const formattedDate = formatDistanceToNow(new Date(item.created_at), {
+    addSuffix: true,
+    locale: ptBR, // Definindo o locale para português
+  });
 
   const { user } = useAuth();
   const { setNewPosts } = usePost();
@@ -121,7 +128,7 @@ export default function Post({ item }: { item: Posts }) {
       >
         <Card className="w-[100%] mx-auto !min-h-full !h-full bg-[#0A0A0A] md:!bg-[#181818] !border-none !shadow-none px-3 ">
           <CardHeader className="justify-between">
-            <div className="flex gap-5">
+            <div className="flex gap-5 items-center ">
               <Avatar
                 isBordered
                 radius="full"
@@ -129,7 +136,7 @@ export default function Post({ item }: { item: Posts }) {
                 src={userFiltered[0]?.avatar_url}
               />
               <div className="flex flex-col gap-1 items-start justify-center">
-                <h4 className="text-small font-semibold leading-none text-white">
+                <h4 className="text-small capitalize  leading-none text-white">
                   {userFiltered[0]?.username}
                 </h4>
               </div>
@@ -193,6 +200,9 @@ export default function Post({ item }: { item: Posts }) {
               {/*  <p>{item.shares}</p> */}
             </Button>
           </CardFooter>
+          <h4 className="text-[11px] ps-[70px] leading-none text-[#ffffff8e]">
+            {formattedDate}
+          </h4>
           <div className="ps-[70px] pe-3 pb-3">
             {isComment && (
               <Textarea

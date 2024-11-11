@@ -21,7 +21,11 @@ export default function Home() {
 
   const getPosts = async () => {
     const response = await get("post/list-all");
-    setFeed(response.data ?? []);
+    const filter = response.data.filter(
+      (post: Posts) => post.content !== "feed"
+    );
+
+    setFeed(filter ?? []);
   };
 
   useEffect(() => {
