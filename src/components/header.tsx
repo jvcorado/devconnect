@@ -4,15 +4,16 @@ import { Avatar } from "@nextui-org/avatar";
 import { useMediaQuery } from "usehooks-ts";
 import { Popover, PopoverTrigger, PopoverContent } from "@nextui-org/popover";
 import { Button } from "@nextui-org/button";
-import { useAuth } from "@/context/authContext";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { useSession, signOut } from "next-auth/react";
 
 export default function Header() {
   const isDesktop = useMediaQuery("(min-width: 1024px)");
-
-  const { user, logout, setOpenLogin } = useAuth();
-
   const path = usePathname();
+  const router = useRouter();
+  const { data: session } = useSession();
+
+  const user = session?.user;
 
   if (
     path === "/login" ||
@@ -30,8 +31,8 @@ export default function Header() {
     >
       <div className="loader"></div>
 
-      {user === null ? (
-        <Button color="primary" onPress={() => setOpenLogin(true)}>
+      {!user ? (
+        <Button color="primary" onPress={() => router.push("/login")}>
           Sign In
         </Button>
       ) : (
@@ -42,15 +43,17 @@ export default function Header() {
                 isBordered
                 radius="full"
                 size="md"
-                src={user?.avatar_url}
+                src={user?.avatar_url || user?.image || ""}
               />
             </Button>
           </PopoverTrigger>
           <PopoverContent>
             <div className="px-1 py-2 flex flex-col gap-3">
-              <div className="text-small font-bold">{user?.name}</div>
-              <div className="text-tiny italic">{user?.bio}</div>
-              <Button color="danger" onPress={() => logout()}>
+              <div className="text-small font-bold">
+                {user?.name || user?.username}
+              </div>
+              {user?.bio && <div className="text-tiny italic">{user.bio}</div>}
+              <Button color="danger" onPress={() => signOut()}>
                 Log out
               </Button>
             </div>

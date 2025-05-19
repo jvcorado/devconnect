@@ -26,10 +26,16 @@ html {
   display: none;
 }
 
-.input-wrapper {
-  background-color: aqua !important;
+[data-slot="input-wrapper"] {
+  border: none !important;
+  box-shadow: none !important;
 }
-.loader {
+
+[data-slot="input-wrapper"]:focus-within {
+  border: none !important;
+  box-shadow: none !important;
+}
+*/ .loader {
   width: 30px;
   height: 30px;
   background: linear-gradient(

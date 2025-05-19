@@ -1,26 +1,22 @@
 "use client";
 
 import { Button } from "@nextui-org/button";
-import { CirclePlus, ImagePlus, Send } from "lucide-react";
+import { CirclePlus } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { Textarea } from "@nextui-org/input";
-
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Controller, useForm } from "react-hook-form";
-import { Avatar } from "@nextui-org/avatar";
-import {
-  CldUploadWidget,
-  CloudinaryUploadWidgetResults,
-} from "next-cloudinary";
 
-import { Posts } from "@/app/page";
-import { useAuth } from "@/context/authContext";
-import create from "@/api/create";
-import ModalSm from "./modal_sm";
-import { usePost } from "@/context/postContext";
-import Image from "next/image";
 import { useMediaQuery } from "usehooks-ts";
+import { toast } from "sonner";
+import TextareaInput from "./textArea";
+import { useForm } from "react-hook-form";
+/* import StorysButton from "./storys"; */
+import { Posts } from "../app/page";
+import { usePost } from "../context/postContext";
+import ModalSm from "./modal_sm";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import create from "../app/api/create";
 
 interface CloudinaryInfo {
   url: string;
@@ -43,9 +39,13 @@ export default function NewPost({
 }) {
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
-  const { user, setOpenLogin } = useAuth();
+  const { data: session } = useSession();
+  const router = useRouter();
   const { setNewPosts, openModal, setOpenModal } = usePost();
   const [urlImage, setUrl] = useState<CloudinaryInfo | null>(null);
+
+  console.log("data", session);
+
   const isDesktop = useMediaQuery("min-width: 1024px");
 
   const {
@@ -59,13 +59,20 @@ export default function NewPost({
   const onSubmit = async () => {
     const post = watch("content");
 
+    if (!post || post.trim() === "") {
+      console.log("Content cannot be empty");
+      return;
+    }
+
     const body = {
-      user_id: Number(user?.id) ?? 0,
+      user_id: session?.user?.id ?? null,
       content: post,
       image_url: urlImage?.url ?? "",
-      likes: 1,
+      likes: 0,
       shares: 0,
     };
+
+    console.log("body", body);
 
     const response = await create({ path: "post/create", body });
 
@@ -74,18 +81,20 @@ export default function NewPost({
       setNewPosts(true);
       setUrl(null);
       setFeed((prevFeed: Posts[]) => [...prevFeed, response.data]);
-      console.log("Post created successfully");
+      toast.success("Post created successfully", {
+        position: "top-right",
+      });
     } else {
-      console.log("Failed to create post");
+      toast.error("Failed to create post", {
+        position: "top-right",
+      });
     }
 
     setOpenModal(false);
   };
 
   const focusInput = () => {
-    if (inputRef.current) {
-      inputRef.current.focus();
-    }
+    inputRef.current?.focus();
   };
 
   const handleKeyDown = (event: React.KeyboardEvent) => {
@@ -101,42 +110,26 @@ export default function NewPost({
   };
 
   const writePost = () => (
-    <div className=" flex flex-col gap-3">
-      {urlImage && <Image src={urlImage.url} width={200} height={200} alt="" />}
-
-      <Controller
-        control={control}
+    <div className="flex flex-col gap-3">
+      <TextareaInput
+        control={control as never}
         name="content"
-        render={({ field }) => (
-          <Textarea
-            {...field}
-            errorMessage={errors.content?.message}
-            variant="bordered"
-            color="secondary"
-            ref={inputRef}
-            onKeyDown={(event) => {
-              handleKeyDown(event);
-              handleKeyDownEsc(event);
-            }}
-            label=""
-            placeholder="Enter your post"
-            defaultValue=""
-            className="w-[100%] mx-auto text-white "
-            autoFocus
-          />
-        )}
+        errorMessage={errors.content?.message}
+        placeholder="Enter your post"
+        onKeyDown={(event) => {
+          handleKeyDown(event);
+          handleKeyDownEsc(event);
+        }}
+        isUpload
+        setUrl={setUrl}
+        urlImage={urlImage}
+        onClose={() => {
+          setOpenModal(false);
+          reset({ content: "" });
+          setUrl(null);
+        }}
+        onSubmit={onSubmit}
       />
-      <Button
-        className={
-          "bg-[#313131] text-[#ffffff] border-default-200 w-[70px] self-end "
-        }
-        radius="full"
-        size="sm"
-        variant={"solid"}
-        onPress={() => onSubmit()}
-      >
-        Add <Send size={24} color="white" />
-      </Button>
     </div>
   );
 
@@ -156,39 +149,22 @@ export default function NewPost({
           }}
           className="flex gap-5 items-center"
         >
-          <Avatar src={user?.avatar_url} />
+          {/*  <StorysButton size="md" />
+           */}
           <div className="flex flex-col gap-1 items-start justify-center ps-4">
             <h4 className="text-small font-semibold leading-none text-[#ffffff]">
-              {user?.username}
+              {session?.user?.username || session?.user?.name}
             </h4>
             <h5 className="text-small tracking-tight text-[#ffffff8e]">
               Write your post
             </h5>
-
-            <CldUploadWidget
-              uploadPreset="devconnect"
-              onSuccess={(results: CloudinaryUploadWidgetResults) => {
-                if (results.info) {
-                  const info: CloudinaryInfo =
-                    typeof results.info === "string"
-                      ? { url: results.info } // If `info` is a string, wrap it in an object
-                      : results.info; // Otherwise, use the object directly
-                  setUrl(info || null); // Set the CloudinaryInfo object
-                  setOpenModal(!openModal);
-                }
-              }}
-            >
-              {({ open }) => (
-                <ImagePlus onClick={() => open()} size={16} color="white" />
-              )}
-            </CldUploadWidget>
           </div>
         </form>
 
         <Button
           onPress={() => {
-            if (user?.id === undefined || null) {
-              return setOpenLogin(true);
+            if (!session?.user?.id) {
+              return router.push("/login");
             }
 
             setOpenModal(!openModal);
@@ -200,7 +176,8 @@ export default function NewPost({
           <CirclePlus color="#336AEA" size={44} />
         </Button>
       </ModalSm>
-      <div className="pt-3  md:pt-0 w-[calc(100%_-_36px)] md:max-w-[60%] lg:max-w-[30%] flex flex-col gap-3 mx-auto">
+
+      <div className="pt-3 md:pt-0 w-[calc(100%_-_36px)] md:max-w-[60%] lg:max-w-[30%] flex flex-col gap-3 mx-auto">
         {openModal && writePost()}
       </div>
     </>

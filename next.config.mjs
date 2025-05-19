@@ -6,9 +6,12 @@ const nextConfig = {
         serverActions: true,
     },
     images: {
-        domains: ['files.stripe.com', 'res.cloudinary.com'],
+        domains: [
+            'files.stripe.com',
+            'res.cloudinary.com',
+            'source.unsplash.com' // ✅ aqui!
+        ],
     },
-
 };
 
 export default nextConfig;

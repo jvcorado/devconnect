@@ -1,4 +1,4 @@
-"use client";
+/* "use client";
 
 import { Button } from "@nextui-org/button";
 import { z } from "zod";
@@ -18,8 +18,8 @@ const userSchema = z.object({
   password: z.string().min(6),
   /*  bio: z.string(),
   avatar_url: z.string().url(), */
-});
-
+/* });
+ */ /* 
 export type UserInputSchema = z.infer<typeof userSchema>;
 
 export default function Register() {
@@ -73,11 +73,10 @@ export default function Register() {
         }}
         className="flex flex-col gap-5 items-center p-10 !overflow-y-auto text-white "
       >
-        <h1 className="text-4xl">DevConnect</h1>
+        <h1 className="text-4xl">DevColab</h1>
         <p className="text-lg text-center">
-          Onde a Tecnologia Encontra a Conexão!
+          Where technology meets collaboration!
         </p>
-
         <div tabIndex={1} className="w-full">
           <FormInput
             name="email"
@@ -128,3 +127,4 @@ export default function Register() {
     </Modals>
   );
 }
+ */

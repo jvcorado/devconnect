@@ -1,14 +1,16 @@
 import type { Metadata, Viewport } from "next";
 import "../globals.css";
-import { AuthProvider } from "../context/authContext";
-import Menu from "@/components/menu";
-import Header from "@/components/header";
-import { PostProvider } from "@/context/postContext";
+
 import Login from "./login/page";
+import { Toaster } from "sonner";
+import { PostProvider } from "../context/postContext";
+import Menu from "../components/menu";
+import Header from "../components/header";
+import AuthProvider from "@/providers/auth";
 
 export const metadata: Metadata = {
-  title: "DevConnect",
-  description: "Onde a Tecnologia Encontra a Conexão!",
+  title: "DevColab",
+  description: "Where technology meets collaboration!",
 };
 
 export const viewport: Viewport = {
@@ -30,6 +32,7 @@ export default function RootLayout({
           <PostProvider>
             <Header />
             {children}
+            <Toaster />
             <Login />
             <Menu />
           </PostProvider>

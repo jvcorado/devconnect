@@ -1,8 +1,5 @@
 "use client";
 
-import get from "@/api/get";
-import { Posts } from "@/app/page";
-
 import React, {
   createContext,
   useContext,
@@ -10,8 +7,9 @@ import React, {
   useEffect,
   ReactNode,
 } from "react";
-import { useAuth } from "./authContext";
 import { usePathname } from "next/navigation";
+import { useSession } from "next-auth/react";
+import { Posts } from "../app/page"; // considere mover o tipo para um arquivo de `types`
 
 interface AboutProfileProps {
   publications: number;
@@ -36,11 +34,11 @@ interface PostProviderProps {
   children: ReactNode;
 }
 
-export const PostProvider: React.FC<PostProviderProps> = ({ children }) => {
+export const PostProvider = ({ children }: PostProviderProps) => {
   const [post, setPost] = useState<Posts[]>([]);
   const [newPosts, setNewPosts] = useState(false);
   const [openModal, setOpenModal] = useState(false);
-  const [aboutProfile, setAboutProfile] = useState({
+  const [aboutProfile, setAboutProfile] = useState<AboutProfileProps>({
     publications: 0,
     likes: 0,
     followers: 0,
@@ -48,33 +46,44 @@ export const PostProvider: React.FC<PostProviderProps> = ({ children }) => {
   });
 
   const path = usePathname();
-  const { user } = useAuth();
-  const id_user = Number(user?.id);
+  const { data: session } = useSession();
+
+  const userId = session?.user?.id;
 
   const getPosts = async () => {
-    const response = await get("post/list-all");
-    const data = response.data ?? [];
-    const filteredPost = data.filter((post: Posts) => post.user_id === id_user);
-    const filter = filteredPost.filter(
-      (post: Posts) => post.content !== "feed"
-    );
+    try {
+      const res = await fetch("/api/post/list-all");
+      const data = await res.json();
 
-    const publications = filter.length;
-    const likes = filter.reduce(
-      (acc: number, post: Posts) => acc + post.likes,
-      0
-    );
+      const userPosts = (data ?? []).filter(
+        (p: Posts) => p.user_id === session?.user?.id && p.content !== "feed"
+      );
 
-    const followers = 0;
-    const following = 0;
+      const statsRes = await fetch(
+        `/api/user/stats?userId=${session?.user?.id}`
+      );
+      const stats = await statsRes.json();
 
-    setPost(filter);
-    setAboutProfile({ publications, likes, followers, following });
+      setPost(userPosts);
+      setAboutProfile({
+        publications: stats.publications ?? 0,
+        likes: userPosts.reduce(
+          (acc: number, post: Posts) => acc + post.likes,
+          0
+        ),
+        followers: stats.followers ?? 0,
+        following: stats.following ?? 0,
+      });
+    } catch (err) {
+      console.error("Erro ao buscar posts e stats:", err);
+    }
   };
 
   useEffect(() => {
-    getPosts();
-  }, [id_user, newPosts]);
+    if (userId) {
+      getPosts();
+    }
+  }, [userId]);
 
   useEffect(() => {
     if (newPosts) {
@@ -108,10 +117,8 @@ export const PostProvider: React.FC<PostProviderProps> = ({ children }) => {
 
 export const usePost = (): PostContextProps => {
   const context = useContext(PostContext);
-
   if (!context) {
-    throw new Error("usePost must be used within an PostProvider");
+    throw new Error("usePost deve ser usado dentro de um PostProvider");
   }
-
   return context;
 };

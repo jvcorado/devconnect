@@ -1,4 +1,4 @@
-"use client";
+/* "use client";
 
 import { usePathname } from "next/navigation";
 // AuthContext.tsx
@@ -100,3 +100,4 @@ export const useAuth = (): AuthContextProps => {
   }
   return context;
 };
+ */

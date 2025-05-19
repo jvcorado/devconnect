@@ -1,7 +1,7 @@
 "use client";
 
-import { usePost } from "@/context/postContext";
 import React from "react";
+import { usePost } from "../context/postContext";
 
 export default function ModalSm({
   handleKeyDownEsc,

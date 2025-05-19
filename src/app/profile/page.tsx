@@ -1,30 +1,31 @@
-"use client";
+/* "use client";
 
-import get from "@/api/get";
-import Container from "@/components/container";
-import ModalSm from "@/components/modal_sm";
-import Post from "@/components/post";
-import { useAuth } from "@/context/authContext";
 import { Avatar } from "@nextui-org/avatar";
-import { usePost } from "@/context/postContext";
+
 import { Button } from "@nextui-org/button";
-import Modals from "@/components/modalUI/modal";
+
 import { useEffect, useState } from "react";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import FormInput from "@/components/inputUI/inputUI";
 import { useForm } from "react-hook-form";
 import {
   CldUploadWidget,
   CloudinaryUploadWidgetResults,
 } from "next-cloudinary";
 import { Plus } from "lucide-react";
-import update from "@/api/update";
+
 import { Posts } from "../page";
 import Stories from "stories-react";
 import "stories-react/dist/index.css";
 import { useMediaQuery } from "usehooks-ts";
-import create from "@/api/create";
+import { usePost } from "@/src/context/postContext";
+import Post from "@/src/components/post";
+import ModalSm from "@/src/components/modal_sm";
+import Container from "@/src/components/container";
+import Modals from "@/src/components/modalUI/modal";
+import FormInput from "@/src/components/inputUI/inputUI";
+import { useSession } from "next-auth/react";
+
 interface CloudinaryInfo {
   url: string;
 }
@@ -46,13 +47,24 @@ export type UserInputSchema = z.infer<typeof userSchema>;
 export default function Profile() {
   const { post, aboutProfile } = usePost();
   const [openModal, setOpenModal] = useState(false);
-  const { setUser, user } = useAuth();
   const [urlImage, setUrl] = useState<CloudinaryInfo | null>(null);
+  const { data: session } = useSession();
+  const user = session?.user;
   const [openStorys, setOpenStorys] = useState(false);
   const [storysFeed, setStorysFeeds] = useState<Story[]>([]);
   const isDesktop = useMediaQuery("(min-width: 1024px)");
 
-  const getStorys = async () => {
+  const {
+    handleSubmit,
+    control,
+    formState: { errors, isSubmitting },
+    watch,
+    reset,
+  } = useForm<UserInputSchema>({
+    resolver: zodResolver(userSchema),
+  }); */
+
+/*   const getStorys = async () => {
     const response = await get("post/list-all");
     const postsWithImages = response.data.filter(
       (item: Posts) => item.content === "feed" && item.image_url !== ""
@@ -65,22 +77,9 @@ export default function Profile() {
     }));
 
     return setStorysFeeds(storyData);
-  };
-  const handleRefresh: () => Promise<void> = async () => {
-    await getStorys();
-  };
+  }; */
 
-  const {
-    handleSubmit,
-    control,
-    formState: { errors, isSubmitting },
-    watch,
-    reset,
-  } = useForm<UserInputSchema>({
-    resolver: zodResolver(userSchema),
-  });
-
-  const uploadImg = async () => {
+/*   const uploadImg = async () => {
     let body = {};
 
     body = {
@@ -91,8 +90,6 @@ export default function Profile() {
       shares: 0,
     };
 
-    console.log(body);
-
     const response = await create({ path: "post/create", body });
 
     if (response.status === 200 || response.status === 201) {
@@ -101,44 +98,47 @@ export default function Profile() {
     } else {
       console.log("Story not created");
     }
+  }; */
+
+/* const onSubmit = async () => {
+  if (!user?.id || !user?.email) {
+    console.log("Usuário inválido. ID ou email ausente.");
+    return;
+  }
+
+  const body = {
+    id: Number(user.id),
+    email: user.email,
+    name: watch("name"),
+    username: watch("username"),
+    bio: watch("bio"),
+    avatar_url: urlImage?.url ?? user.avatar_url,
   };
 
-  const onSubmit = async () => {
-    let body = {};
+  const response = await update({ path: "user/update", body });
 
-    body = {
-      id: Number(user?.id),
-      email: user?.email,
-      name: watch("name"),
-      username: watch("username"),
-      bio: watch("bio"),
-      avatar_url: urlImage?.url ?? user?.avatar_url,
-    };
-
-    const response = await update({ path: "user/update", body });
-
-    if (response.status === 200 || response.status === 201) {
-      reset({});
-      setUser(response.data);
-      setOpenModal(false);
-    } else {
-      console.log("User not created");
-    }
-  };
-
-  useEffect(() => {
+  if (response.status === 200 || response.status === 201) {
+    reset();
+    setUser(response.data); // certifique-se que setUser está vindo de algum hook/contexto
+    setOpenModal(false);
+  } else {
+    console.error("Erro ao atualizar usuário");
+  }
+};
+ */
+/*   useEffect(() => {
     if (urlImage) {
       uploadImg();
     }
-  }, [urlImage]);
+  }, [urlImage]); */
 
-  useEffect(() => {
+/*  useEffect(() => {
     if (openStorys) {
       getStorys();
     }
-  }, [openStorys]);
+  }, [openStorys]); */
 
-  useEffect(() => {
+/*  useEffect(() => {
     reset({
       name: user?.name,
       username: user?.username,
@@ -312,7 +312,7 @@ export default function Profile() {
         </div>
       </ModalSm>
 
-      <Container handleRefresh={handleRefresh}>
+      <Container>
         <div className="flex flex-col md:gap-3 ">
           {post
             .slice()
@@ -324,6 +324,75 @@ export default function Profile() {
       </Container>
 
       {openModal && modal()}
+    </div>
+  );
+}
+ */
+
+"use client";
+
+import { useSession } from "next-auth/react";
+import { Avatar } from "@nextui-org/avatar";
+import { usePost } from "@/src/context/postContext";
+import Post from "@/src/components/post";
+import Container from "@/src/components/container";
+
+export default function ProfilePage() {
+  const { data: session } = useSession();
+  const user = session?.user;
+  const { post, aboutProfile } = usePost();
+
+  const userPosts = post.filter((p) => p.user_id === user?.id);
+
+  return (
+    <div className="flex flex-col gap-4 md:gap-6 relative px-4 py-6">
+      {/* Header com avatar, nome e bio */}
+      <div className="flex items-center gap-4">
+        <Avatar
+          size="lg"
+          isBordered
+          radius="full"
+          src={user?.avatar_url || user?.image || ""}
+        />
+        <div className="flex flex-col gap-1 text-white">
+          <h2 className="text-lg font-semibold">{user?.name}</h2>
+          <p className="text-sm text-[#ffffff8e]">
+            {user?.bio ?? "Nenhuma biografia cadastrada"}
+          </p>
+        </div>
+      </div>
+
+      {/* Contadores */}
+      <div className="flex justify-around text-white text-center">
+        <div>
+          <p className="font-bold text-lg">{userPosts.length}</p>
+          <p className="text-sm">Posts</p>
+        </div>
+        <div>
+          <p className="font-bold text-lg">{aboutProfile.followers}</p>
+          <p className="text-sm">Followers</p>
+        </div>
+        <div>
+          <p className="font-bold text-lg">{aboutProfile.following}</p>
+          <p className="text-sm">Following</p>
+        </div>
+      </div>
+
+      {/* Lista de posts */}
+      <Container>
+        <div className="flex flex-col gap-4">
+          {userPosts.length > 0 ? (
+            userPosts
+              .slice()
+              .reverse()
+              .map((post) => <Post key={post.id} item={post} />)
+          ) : (
+            <p className="text-center text-white mt-4">
+              Nenhuma publicação feita ainda.
+            </p>
+          )}
+        </div>
+      </Container>
     </div>
   );
 }
